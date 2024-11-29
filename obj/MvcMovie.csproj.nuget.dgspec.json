@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\luis_\\OneDrive\\Documentos\\WepApp\\MvcMovie\\MvcMovie.csproj": {}
+    "C:\\Users\\luis_\\OneDrive\\Documentos\\WebApp\\MvcMovie.csproj": {}
   },
   "projects": {
-    "C:\\Users\\luis_\\OneDrive\\Documentos\\WepApp\\MvcMovie\\MvcMovie.csproj": {
+    "C:\\Users\\luis_\\OneDrive\\Documentos\\WebApp\\MvcMovie.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\luis_\\OneDrive\\Documentos\\WepApp\\MvcMovie\\MvcMovie.csproj",
+        "projectUniqueName": "C:\\Users\\luis_\\OneDrive\\Documentos\\WebApp\\MvcMovie.csproj",
         "projectName": "MvcMovie",
-        "projectPath": "C:\\Users\\luis_\\OneDrive\\Documentos\\WepApp\\MvcMovie\\MvcMovie.csproj",
+        "projectPath": "C:\\Users\\luis_\\OneDrive\\Documentos\\WebApp\\MvcMovie.csproj",
         "packagesPath": "C:\\Users\\luis_\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\luis_\\OneDrive\\Documentos\\WepApp\\MvcMovie\\obj\\",
+        "outputPath": "C:\\Users\\luis_\\OneDrive\\Documentos\\WebApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\luis_\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -45,6 +45,18 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authorization": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.AspNetCore.Identity.UI": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.2, )"
@@ -71,7 +83,7 @@
             },
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[8.0.0, )"
             },
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
