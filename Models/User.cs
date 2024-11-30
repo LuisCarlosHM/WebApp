@@ -7,9 +7,12 @@ namespace MvcMovie.Models
         public bool IsBlocked { get; set; } = false;
 
         [PersonalData]
-        public string FirstName { get; set; }
+        public required string FirstName { get; set; }
         [PersonalData]
-        public string LastName { get; set; }
-        // You can add custom properties here, like FirstName, LastName, etc.
+        public required string LastName { get; set; }
+        public DateTime? LastLoginTime { get; set; } = DateTime.Now;
+
+        // Registration time is handled by Identity (but we can define it here if needed)
+        public DateTime RegistrationTime { get; set; } = DateTime.Now;
     }
 }

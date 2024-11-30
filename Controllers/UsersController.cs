@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using MvcMovie.Data;
 using MvcMovie.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+
 
 namespace MvcMovie.Controllers
 {
@@ -16,9 +19,74 @@ namespace MvcMovie.Controllers
     {
         private readonly MvcMovieContext _context;
 
-        public UsersController(MvcMovieContext context)
+        private readonly SignInManager<ApplicationUser> _signInManager;
+
+        public UsersController(MvcMovieContext context, SignInManager<ApplicationUser> signInManager)
         {
+            _signInManager = signInManager;
             _context = context;
+        }
+        // Block users
+        [HttpPost]
+        // [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BlockUsers([FromBody] string[] ids)
+        {
+            if (ids == null || ids.Length == 0)
+            {
+                return Json(new { success = false, message = "No users selected for blocking." });
+            }
+
+            var users = await _context.Users.Where(user => ids.Contains(user.Id)).ToListAsync();
+            // Get the current user's ID
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            foreach (var user in users)
+            {
+                if (!user.IsBlocked) // Block only if not already blocked
+                {
+                    user.IsBlocked = true; // Set IsBlocked to true
+                } 
+            }
+
+            await _context.SaveChangesAsync();
+
+
+            // Check if the current user is in the list of users to be deleted
+            if (currentUserId != null && users.Any(user => user.Id == currentUserId))
+            {
+                // Log out the current user
+                await _signInManager.SignOutAsync();
+
+            }
+
+            return Json(new { success = true, message = $"{users.Count} user(s) blocked successfully." });
+        }
+
+        // Unblock users
+        [HttpPost]
+        // [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnblockUsers([FromBody] string[] ids)
+        {
+            if (ids == null || ids.Length == 0)
+            {
+                return Json(new { success = false, message = "No users selected for unblocking." });
+            }
+
+            var users = await _context.Users.Where(user => ids.Contains(user.Id)).ToListAsync();
+
+            foreach (var user in users)
+            {
+                if (user.IsBlocked) // Unblock only if blocked
+                {
+                    user.IsBlocked = false; // Set IsBlocked to false
+                }
+            }
+
+            
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = $"{users.Count} user(s) unblocked successfully." });
         }
 
         // GET: Users
@@ -137,23 +205,54 @@ namespace MvcMovie.Controllers
         }
 
         // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            var applicationUser = await _context.Users.FindAsync(id);
-            if (applicationUser != null)
-            {
-                _context.Users.Remove(applicationUser);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool ApplicationUserExists(string id)
-        {
-            return _context.Users.Any(e => e.Id == id);
-        }
+        // POST: Users/DeleteSelected
+        [HttpPost]
+        // [ValidateAntiForgeryToken]
+   public async Task<IActionResult> DeleteSelected([FromBody] string[] ids)
+{
+    if (ids == null || ids.Length == 0)
+    {
+        return Json(new { success = false, message = "No users selected for deletion." });
     }
+
+    // Get the current user's ID
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+    var usersToDelete = _context.Users.Where(user => ids.Contains(user.Id)).ToList();
+
+    if (usersToDelete.Count == 0)
+    {
+        return Json(new { success = false, message = "No valid users found for deletion." });
+    }
+
+    // Check if the current user is in the list of users to be deleted
+    if (currentUserId != null && usersToDelete.Any(user => user.Id == currentUserId))
+    {
+        // Log out the current user
+        await _signInManager.SignOutAsync();
+
+    }
+
+    // Remove the selected users from the database
+    _context.Users.RemoveRange(usersToDelete);
+    await _context.SaveChangesAsync();
+
+    // Handle response differently if the current user was logged out
+    if (currentUserId != null && ids.Contains(currentUserId))
+    {
+        return Json(new { success = true, message = "Your account has been deleted. You have been logged out." });
+    }
+
+    return Json(new { success = true, message = $"{usersToDelete.Count} user(s) deleted successfully." });
+}
+
+            private bool ApplicationUserExists(string id)
+            {
+                return _context.Users.Any(e => e.Id == id);
+            }
+        }
+
+
+        
+
 }

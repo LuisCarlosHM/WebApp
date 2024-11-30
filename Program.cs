@@ -3,8 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using MvcMovie.Data;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using MvcMovie.Data;
 using MvcMovie.Models;
 
 

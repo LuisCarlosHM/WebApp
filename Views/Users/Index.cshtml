@@ -1,131 +1,188 @@
 @model IEnumerable<MvcMovie.Models.ApplicationUser>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "User Management";
 }
 
-<h1>Index</h1>
+<h1 class="text-center mb-4">@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IsBlocked)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FirstName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastName)
-            </th>
-            @* <th>
-                @Html.DisplayNameFor(model => model.UserName)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.NormalizedUserName)
-            </th> *@
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            @* <th>
-                @Html.DisplayNameFor(model => model.NormalizedEmail)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.EmailConfirmed)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.PasswordHash)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.SecurityStamp)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.ConcurrencyStamp)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.PhoneNumberConfirmed)
-            </th> *@
-            @* <th>
-                @Html.DisplayNameFor(model => model.TwoFactorEnabled)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LockoutEnd)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LockoutEnabled)
-            </th> *@
-            <th>
-                @Html.DisplayNameFor(model => model.AccessFailedCount)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsBlocked)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            @* <td>
-                @Html.DisplayFor(modelItem => item.UserName)
-            </td> *@
-            @* <td>
-                @Html.DisplayFor(modelItem => item.NormalizedUserName)
-            </td> *@
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            @* <td>
-                @Html.DisplayFor(modelItem => item.NormalizedEmail)
-            </td> *@
-            @* <td>
-                @Html.DisplayFor(modelItem => item.EmailConfirmed)
-            </td> *@
-            @* <td>
-                @Html.DisplayFor(modelItem => item.PasswordHash)
-            </td> *@
-            @* <td>
-                @Html.DisplayFor(modelItem => item.SecurityStamp)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ConcurrencyStamp)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumberConfirmed)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TwoFactorEnabled)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LockoutEnd)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LockoutEnabled)
-            </td> *@
-            <td>
-                @Html.DisplayFor(modelItem => item.AccessFailedCount)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+<!-- Toolbar for filtering, blocking, and unblocking users -->
+<div class="d-flex justify-content-between mb-3">
+    <div>
+        <button class="btn btn-outline-danger" id="blockSelected">Block  <i class="fa-solid fa-ban"></i> </button>
+        <button class="btn btn-outline-secondary" id="unblockSelected"><i class="fa-solid fa-unlock"></i></button>
+        <button class="btn btn-outline-primary" id="deleteSelected"><i class="fa-solid fa-trash"></i></button>
+    </div>
+    <div>
+        <input class="form-control" type="text" id="searchInput" placeholder="Search Users..." style="max-width: 300px;" />
+    </div>
+</div>
+
+<!-- Bootstrap Alert container (this will hold your dynamic alerts) -->
+<div id="alertContainer"></div>
+
+<!-- User Management Table -->
+<div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>
+                    <input type="checkbox" id="selectAll" class="form-check-input" />
+                </th>
+                <th>Name</th>
+                <th>@Html.DisplayNameFor(model => model.Email)</th>
+                <th>Last Activity</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <input type="checkbox" class="userCheckbox" data-id="@item.Id" />
+                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.LastName), @Html.DisplayFor(modelItem => item.FirstName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                    <td>
+                        @if (item.LastLoginTime.HasValue)
+                        {
+                            <div>
+                                <span>@GetTimeAgo(item.LastLoginTime.Value)</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <span>Never</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.IsBlocked)
+                        {
+                            <span class="badge btn-secondary">Blocked</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const userCheckboxes = document.querySelectorAll('.userCheckbox');
+            const blockButton = document.getElementById('blockSelected');
+            const unblockButton = document.getElementById('unblockSelected');
+            const deleteButton = document.getElementById('deleteSelected');
+            const searchInput = document.getElementById('searchInput');
+            const alertContainer = document.getElementById('alertContainer');
+
+            // Select/Deselect all checkboxes
+            selectAllCheckbox.addEventListener('change', function () {
+                const isChecked = selectAllCheckbox.checked;
+                userCheckboxes.forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+            });
+
+            // Handle filter/search input
+            searchInput.addEventListener('input', function () {
+                const query = searchInput.value.toLowerCase();
+                const rows = document.querySelectorAll('#userTableBody tr');
+                rows.forEach(row => {
+                    const name = row.cells[1].textContent.toLowerCase();
+                    const email = row.cells[2].textContent.toLowerCase();
+                    if (name.includes(query) || email.includes(query)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+
+            // Handle bulk block/unblock/delete actions
+            blockButton.addEventListener('click', function () {
+                handleBulkAction('BlockUsers');
+            });
+            unblockButton.addEventListener('click', function () {
+                handleBulkAction('UnblockUsers');
+            });
+            deleteButton.addEventListener('click', function () {
+                handleBulkAction('DeleteSelected');
+            });
+
+            function handleBulkAction(action) {
+                const selectedIds = Array.from(userCheckboxes)
+                    .filter(checkbox => checkbox.checked)
+                    .map(checkbox => checkbox.dataset.id);
+
+                if (selectedIds.length === 0) {
+                    showAlert('Please select users to ' + action, 'danger');
+                    return;
+                }
+
+                // Send AJAX request to perform action (block/unblock/delete) on selected users
+                fetch(`/Users/${action}`, {
+                    method: 'POST',
+                    body: JSON.stringify(selectedIds),  // Send the selected user IDs
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Action completed successfully.', 'success');
+                        location.reload(); // Reload the page after the action
+                    } else {
+                        showAlert('Failed to perform action: ' + data.message, 'danger');
+                    }
+                })
+                .catch(error => showAlert('Error: ' + error, 'danger'));
+            }
+
+            // Function to display Bootstrap alert
+            function showAlert(message, type) {
+                const alert = document.createElement('div');
+                alert.classList.add('alert', `alert-${type}`, 'alert-dismissible', 'fade', 'show');
+                alert.role = 'alert';
+                alert.innerHTML = `
+                    <strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                alertContainer.appendChild(alert);
+
+                // Automatically remove the alert after 5 seconds
+                setTimeout(() => {
+                    alert.classList.remove('show');
+                    alert.classList.add('fade');
+                }, 5000);
+            }
+        });
+    </script>
 }
-    </tbody>
-</table>
+
+
+@functions {
+    public string GetTimeAgo(DateTime dateTime)
+    {
+        var timeSpan = DateTime.Now - dateTime;
+
+        if (timeSpan.TotalSeconds < 60)
+            return $"{Math.Floor(timeSpan.TotalSeconds)} second{(Math.Floor(timeSpan.TotalSeconds) > 1 ? "s" : "")} ago";
+        if (timeSpan.TotalMinutes < 60)
+            return $"{Math.Floor(timeSpan.TotalMinutes)} minute{(Math.Floor(timeSpan.TotalMinutes) > 1 ? "s" : "")} ago";
+        if (timeSpan.TotalHours < 24)
+            return $"{Math.Floor(timeSpan.TotalHours)} hour{(Math.Floor(timeSpan.TotalHours) > 1 ? "s" : "")} ago";
+        if (timeSpan.TotalDays < 30)
+            return $"{Math.Floor(timeSpan.TotalDays)} day{(Math.Floor(timeSpan.TotalDays) > 1 ? "s" : "")} ago";
+        if (timeSpan.TotalDays < 365)
+            return $"{Math.Floor(timeSpan.TotalDays / 30)} month{(Math.Floor(timeSpan.TotalDays / 30) > 1 ? "s" : "")} ago";
+        return $"{Math.Floor(timeSpan.TotalDays / 365)} year{(Math.Floor(timeSpan.TotalDays / 365) > 1 ? "s" : "")} ago";
+    }
+}
